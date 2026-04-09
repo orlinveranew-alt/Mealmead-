@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Offline – MealMate</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: linear-gradient(135deg, #fff7ed 0%, #fef3c7 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .card {
+      background: #ffffff;
+      border: 1.5px solid #fed7aa;
+      border-radius: 24px;
+      padding: 40px 36px;
+      max-width: 440px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(120, 53, 15, 0.10);
+    }
+
+    /* STATUS BADGE */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 24px;
+      transition: all 0.4s ease;
+    }
+    .status-badge.offline {
+      background: #fef2f2;
+      border: 1.5px solid #fecaca;
+      color: #dc2626;
+    }
+    .status-badge.online {
+      background: #f0fdf4;
+      border: 1.5px solid #bbf7d0;
+      color: #16a34a;
+    }
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+    .status-badge.offline .status-dot {
+      animation: blink 1.2s ease-in-out infinite;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.2; }
+    }
+
+    /* ICON */
+    .icon-wrap {
+      width: 80px; height: 80px;
+      background: linear-gradient(135deg, #f97316, #f59e0b);
+      border-radius: 20px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 38px;
+      margin: 0 auto 20px;
+      box-shadow: 0 8px 24px rgba(249, 115, 22, 0.30);
+      animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-8px); }
+    }
+
+    .brand {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px; font-weight: 900;
+      color: #c2410c; margin-bottom: 6px;
+    }
+
+    h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px; font-weight: 700;
+      color: #1c0a00; margin-bottom: 10px;
+    }
+
+    p {
+      font-size: 14px; color: #6b4226;
+      line-height: 1.7; font-weight: 300;
+      margin-bottom: 6px;
+    }
+
+    /* MOTIVASI */
+    .motivasi {
+      background: #fef3c7;
+      border: 1.5px solid #fcd34d;
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin: 20px 0;
+      font-size: 13px; color: #92400e;
+      font-style: italic; font-weight: 500;
+      line-height: 1.6;
+      cursor: pointer;
+      transition: background 0.2s;
+      position: relative;
+    }
+    .motivasi:hover { background: #fde68a; }
+    .motivasi::after {
+      content: "ketuk untuk ganti 🔄";
+      display: block;
+      font-size: 10px; font-style: normal;
+      color: #b45309; margin-top: 6px; opacity: 0.7;
+    }
+
+    /* TOMBOL */
+    .btn-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 8px; }
+
+    .btn-retry {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      background: linear-gradient(135deg, #f97316, #f59e0b);
+      color: white; font-family: 'DM Sans', sans-serif;
+      font-size: 15px; font-weight: 600;
+      padding: 13px 32px; border: none; border-radius: 40px;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(249, 115, 22, 0.35);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn-retry:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(249, 115, 22, 0.45); }
+    .btn-retry:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    .btn-tips-toggle {
+      background: #fff7ed; color: #c2410c;
+      border: 1.5px solid #fed7aa; border-radius: 40px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px; font-weight: 600;
+      padding: 10px 24px; cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-tips-toggle:hover { background: #ffedd5; }
+
+    /* RETRY COUNT */
+    .retry-info {
+      font-size: 11px; color: #a16207;
+      margin-top: 4px; margin-bottom: 16px;
+    }
+
+    /* RECONNECT BANNER */
+    .reconnect-banner {
+      display: none;
+      background: #f0fdf4;
+      border: 1.5px solid #86efac;
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      font-size: 13px; color: #166534; font-weight: 600;
+      animation: fadeIn 0.5s ease;
+    }
+    .reconnect-banner.show { display: block; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
+
+    /* TIPS OFFLINE */
+    .tips-offline {
+      display: none;
+      margin-top: 20px;
+      background: #fff7ed;
+      border: 1.5px solid #fed7aa;
+      border-radius: 14px;
+      padding: 16px;
+      text-align: left;
+    }
+    .tips-offline.show { display: block; }
+    .tips-offline h3 {
+      font-size: 13px; font-weight: 700;
+      color: #92400e; margin-bottom: 10px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .tips-offline ul { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+    .tips-offline li {
+      font-size: 12px; color: #6b4226; font-weight: 400;
+      display: flex; align-items: flex-start; gap: 8px; line-height: 1.5;
+    }
+    .tips-offline li::before { content: "🍳"; flex-shrink: 0; font-size: 13px; }
+
+    .footer-note {
+      margin-top: 20px;
+      font-size: 11px; color: #d97706;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+
+    <!-- STATUS BADGE -->
+    <div class="status-badge offline" id="statusBadge">
+      <span class="status-dot"></span>
+      <span id="statusText">Tidak ada koneksi</span>
+    </div>
+
+    <!-- RECONNECT BANNER -->
+    <div class="reconnect-banner" id="reconnectBanner">
+      ✅ Koneksi kembali! Mengalihkan ke MealMate...
+    </div>
+
+    <!-- ICON & BRAND -->
+    <div class="icon-wrap">🍳</div>
+    <div class="brand">MealMate</div>
+
+    <h2>Kamu Sedang Offline</h2>
+    <p>Koneksi internetmu terputus. Periksa jaringan Wi-Fi atau data selulermu, lalu coba lagi.</p>
+
+    <!-- MOTIVASI (tap to change) -->
+    <div class="motivasi" id="motivasiText" onclick="gantiQuote()"></div>
+
+    <!-- TOMBOL -->
+    <div class="btn-group">
+      <button class="btn-retry" id="btnRetry" onclick="retryConnection()">
+        🔄 Coba Lagi
+      </button>
+      <button class="btn-tips-toggle" onclick="toggleTips()">
+        💡 Tips Masak Sambil Nunggu Sinyal
+      </button>
+    </div>
+
+    <p class="retry-info" id="retryInfo"></p>
+
+    <!-- TIPS OFFLINE -->
+    <div class="tips-offline" id="tipsOffline">
+      <h3>🥕 Yang Bisa Kamu Lakukan Sekarang</h3>
+      <ul>
+        <li>Cek bahan-bahan di dapur yang kamu punya sekarang</li>
+        <li>Rencanain menu untuk besok biar nggak bingung</li>
+        <li>Stok bahan andalan: telur, bawang, kecap, minyak, garam</li>
+        <li>Masak nasi dulu sambil nunggu internet nyambung 🍚</li>
+        <li>Ingat-ingat resep favorit dari MealMate yang udah pernah kamu coba</li>
+      </ul>
+    </div>
+
+    <p class="footer-note">MealMate akan otomatis kembali saat internet tersambung</p>
+  </div>
+
+  <script>
+    const quotes = [
+      '"Sambil nunggu sinyal, rencanain mau masak apa dulu ya 😄"',
+      '"Offline dulu nggak apa-apa, yang penting perutnya jangan offline juga 😆"',
+      '"Tenang, MealMate balik lagi begitu internet nyambung 💪"',
+      '"Gunakan waktu ini buat cek bahan di dapur! 🥕"',
+      '"Sinyal hilang, semangat masak jangan hilang 🔥"',
+      '"Nggak ada sinyal bukan berarti nggak bisa makan enak 😤"',
+      '"Sambil offline, cek kulkas dulu siapa tahu ada bahan tersembunyi 😆"',
+    ];
+
+    let quoteIdx = Math.floor(Math.random() * quotes.length);
+    let retryCount = 0;
+    let tipsOpen = false;
+
+    // Tampilkan quote awal
+    function gantiQuote() {
+      quoteIdx = (quoteIdx + 1) % quotes.length;
+      document.getElementById('motivasiText').textContent = quotes[quoteIdx];
+    }
+    document.getElementById('motivasiText').textContent = quotes[quoteIdx];
+
+    // Toggle tips
+    function toggleTips() {
+      tipsOpen = !tipsOpen;
+      document.getElementById('tipsOffline').classList.toggle('show', tipsOpen);
+    }
+
+    // Retry manual
+    function retryConnection() {
+      const btn = document.getElementById('btnRetry');
+      btn.disabled = true;
+      btn.textContent = '⏳ Memeriksa koneksi...';
+      retryCount++;
+      document.getElementById('retryInfo').textContent =
+        `Percobaan ke-${retryCount} — ${new Date().toLocaleTimeString('id-ID')}`;
+
+      setTimeout(() => {
+        if (navigator.onLine) {
+          window.location.reload();
+        } else {
+          btn.disabled = false;
+          btn.innerHTML = '🔄 Coba Lagi';
+        }
+      }, 1500);
+    }
+
+    // Update status badge
+    function updateStatus(isOnline) {
+      const badge = document.getElementById('statusBadge');
+      const text = document.getElementById('statusText');
+      if (isOnline) {
+        badge.className = 'status-badge online';
+        text.textContent = 'Koneksi tersambung!';
+      } else {
+        badge.className = 'status-badge offline';
+        text.textContent = 'Tidak ada koneksi';
+      }
+    }
+
+    // Auto-detect saat koneksi kembali
+    window.addEventListener('online', () => {
+      updateStatus(true);
+      document.getElementById('reconnectBanner').classList.add('show');
+      setTimeout(() => window.location.reload(), 2000);
+    });
+
+    window.addEventListener('offline', () => {
+      updateStatus(false);
+      document.getElementById('reconnectBanner').classList.remove('show');
+    });
+
+    // Cek status awal
+    updateStatus(navigator.onLine);
+  </script>
+</body>
+
+</html>
